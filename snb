@@ -1,0 +1,52 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Copyright (c) 2017 Citon Computer Corporation - All Rights Reserved
+Unauthorized copying of this file, via any medium is strictly prohibited
+Proprietary and confidential
+
+@author: Paul Hirsch <paul.hirsch@citon.com>
+
+Shake n' Bake - Manual templating every bit as clever as Ricky Bobby
+
+Read a Jinja2 template file and write it out to a new file after
+prompting the user to input any undefined values.  That is all.  Does not
+feature spider monkey powers.
+"""
+
+import argparse
+import crypt
+import sys
+from jinja2 import Environment, FileSystemLoader, meta
+
+par = argparse.ArgumentParser(description="Shake N' Bake a Jinja2 template",
+                              epilog="If you ain't first you're last...")
+par.add_argument('template', help="Jinja2 template to fill (default STDIN)",
+                 type=argparse.FileType('r'), nargs='?', default=sys.stdin)
+par.add_argument('output', help="Output file (default STDOUT)",
+                 type=argparse.FileType('w'), nargs='?', default=sys.stdout)
+
+args = par.parse_args()
+
+env = Environment()
+jt = args.template.read()
+
+# Get the list of items to query
+ab = env.parse(jt)
+missing = sorted(meta.find_undeclared_variables(ab))
+
+vd = {}
+
+for q in missing:
+    if q.endswith('password'):
+        t = input("Enter plaintext for '{0}' (Will be hashed to SHA512 crypted password): ".format(q)).strip()
+        vd[q] = crypt.crypt(t, crypt.mksalt(crypt.METHOD_SHA512))
+    else:
+        vd[q] = input("Enter a value for '{0}': ".format(q)).strip()
+
+# Spit out the fire
+template = env.from_string(jt)
+
+args.output.write(template.render(vd))
+
+sys.exit(0)
