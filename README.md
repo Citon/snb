@@ -94,16 +94,20 @@ The resulting output would be:
 
 Stupid simple, huh?
 
-There is one "feature" - If your template variable ends in "password"
-the input will be fed through UNIX crypt using SHA512.  (Type 6).  You
-can use this feature on Linux, BSD, JUNOS, and anything else that can
-take a salted crypt output.  Example (from a JUNOS setup):
+There is one "feature" - A password hasher.  If your template variable ends in
+"pass_ALGORITHM" the input will be fed through UNIX crypt using the given hash
+algorithm.  Supported types are:
 
-	set system root-authentication encrypted-password "{{ root_password }}"
+* sha512 - SHA512 for fresh BSD and Linux
+* md5 - MD5 for JUNOS type 1
+
+Example (from a JUNOS setup):
+
+	set system root-authentication encrypted-password "{{ root_pass_md5 }}"
 
 When fed through, after entering your root_password value, might produce:
 
-	set system root-authentication encrypted-password "$6$THum5Wu3c7GguJbo$efPQeMaizqNcr8V2sp0lj/q5Vy3aZMXtptHmy/neFvEIZICE/SWEYzVH3wVBMZJ0iIT0k1cgzbVNZq7DqVJ2a0"
+	set system root-authentication encrypted-password "$1$v3bf1pyb$tFtHxtlz4VVG9G2CcJ74C0"
 
 
 DISCLAIMER

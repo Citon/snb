@@ -39,7 +39,10 @@ missing = sorted(meta.find_undeclared_variables(ab))
 vd = {}
 
 for q in missing:
-    if q.endswith('password'):
+    if q.endswith('pass_md5'):
+        t = input("Enter plaintext for '{0}' (Will be hashed to MD5 crypted password): ".format(q)).strip()
+        vd[q] = crypt.crypt(t, crypt.mksalt(crypt.METHOD_MD5))
+    elif q.endswith('pass_sha512'):
         t = input("Enter plaintext for '{0}' (Will be hashed to SHA512 crypted password): ".format(q)).strip()
         vd[q] = crypt.crypt(t, crypt.mksalt(crypt.METHOD_SHA512))
     else:
